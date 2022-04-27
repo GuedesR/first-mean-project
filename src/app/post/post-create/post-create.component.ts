@@ -20,6 +20,7 @@ export class PostCreateComponent {
     }
 
     const emittedPost: Post = {
+      id: '',
       title: form.value.title,
       content: form.value.content
     }
