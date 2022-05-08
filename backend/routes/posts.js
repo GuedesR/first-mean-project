@@ -2,6 +2,7 @@ const express = require("express");
 const Post = require("../models/post");
 
 const multer = require("multer");
+const { count } = require("console");
 
 const router = express.Router();
 
@@ -26,12 +27,28 @@ const storage = multer.diskStorage({
 });
 
 router.get("", (req, res, next) => {
-  Post.find().then((data) => {
-    res.status(200).json({
-      message: "Posts fetched successfuly",
-      postList: data,
+  const pageSize = +req.query.pageSize;
+  const currPage = +req.query.page;
+  const postQuery = Post.find();
+  let foundPostList;
+
+  if(pageSize && currPage) {
+    postQuery
+      .skip(pageSize * (currPage - 1))
+      .limit(pageSize);
+  }
+  postQuery
+    .then((data) => {
+      foundPostList = data;
+      return Post.count();
+    })
+    .then(count => {
+      res.status(200).json({
+        message: "Posts fetched successfuly",
+        postList: foundPostList,
+        maxPosts: count
+      });
     });
-  });
 });
 
 router.post(
